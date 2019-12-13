@@ -800,9 +800,9 @@ def formatMediaItem(entry, mediaData, check_storage_space=True):
             query = """
             DELETE FROM userAssets
                   WHERE id <> {0}
-                    AND fileName='{1}'
-                    AND deviceID='{2}'
-                    AND groupID={3}
+                    AND deviceID='{1}'
+                    AND groupID={2}
+                    AND fileName='{3}'
             """.format(existingEntries[0]["id"], entry["deviceID"],
                        entry["groupID"], finished_fname)
             execute_mySQL(query, entry.get("mediaID", entry["id"]), False)
