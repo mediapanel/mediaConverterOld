@@ -522,7 +522,7 @@ def generateSymbolicLink(path, output_dir, first_replacement="uploaded",
 
 
 # Handles the actual formatting
-def formatMediaItem(entry, mediaData):
+def formatMediaItem(entry, mediaData, check_storage_space=True):
     # Get the device version to pick correct path
 
     if mediaData["mediaType"] in ("Video", "Audio"):
@@ -691,7 +691,10 @@ def formatMediaItem(entry, mediaData):
         count += entry["app_displayAD"]
         count += entry["app_alerts"]
         count += entry["app_jukebox"]
-    canSupportFile = checkStorageLimitation(entry, finished_fname_path, count)
+    canSupportFile = not check_storage_space
+    if check_storage_space:
+        canSupportFile = checkStorageLimitation(entry, finished_fname_path,
+                                                count)
     logging.info("Storage can support filesize: {0}".format(canSupportFile))
 
     # Create symlinks
@@ -865,19 +868,27 @@ def processFormatEntry(entry, inProgress, lock):
                     os.mkdir(directory)
                 except OSError as e:
                     logging.warning("Unable to make '%s': %r", directory, e)
-                    pass
                 subprocess.call(["/usr/bin/pdftoppm", mediaData["filePath"],
                                  "-png", directory + "/output"])
                 old_entry = entry.copy()
                 os.remove(mediaData["filePath"])
                 files = filter(lambda x: "output" in x, os.listdir(directory))
-                for i, path in enumerate(files):
+                to_process = []
+                for path in files:
+                    filename = os.path.basename(path).rpartition(".")[0]
+                    file_number = filename.rpartition("-")[-1]
                     mediaData = {"rotation": "none", "mediaType": "Image",
                                  "filePath": directory + "/" + path}
-                    entry["fileName"] = "%s_%s" % (i, old_entry["fileName"])
-                    entry["mediaID"] = "%s_%s" % (entry["id"], i)
+                    entry["fileName"] = "%s_%s" % (file_number,
+                                                   old_entry["fileName"])
+                    entry["mediaID"] = "%s_%s" % (old_entry["id"], file_number)
+                    entry["id"] = "%s0000%s" % (old_entry["id"], file_number)
                     logging.debug("%r", mediaData)
-                    formatMediaItem(entry.copy(), mediaData)
+                    to_process.append((entry.copy(), mediaData.copy()))
+                for item in sorted(to_process, key=lambda x: x[0]["mediaID"],
+                                   reverse=True):
+                    formatMediaItem(*item, check_storage_space=False)
+                updateMediaItemStatus(old_entry["id"], "Converted", True)
             else:
                 formatMediaItem(entry, mediaData)
     except Exception as e:
