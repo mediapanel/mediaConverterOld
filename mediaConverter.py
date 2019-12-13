@@ -315,7 +315,7 @@ def downloadYoutubeURL(url, filePath):
         spot = info.find("youtube-")
         if spot > -1:
             info = info[spot:]
-            end = info.find(".mp4")
+            end = info.rfind(".mp4")
             fileName = info[:end+4]
             return fileName
     return ""
@@ -444,12 +444,12 @@ def updateMediaItemStatus(entryID, status, timeStamp=False):
         query = """
         UPDATE mediaConvertQueue
            SET status='{}', convertTimestamp=NOW()
-         WHERE id={}""".format(status, entryID)
+         WHERE id={}""".format(status.replace("'", "_"), entryID)
     else:
         query = """
         UPDATE mediaConvertQueue
            SET status='{}'
-         WHERE id={}""".format(status, entryID)
+         WHERE id={}""".format(status.replace("'", "_"), entryID)
     execute_mySQL(query, entryID)
 
 
