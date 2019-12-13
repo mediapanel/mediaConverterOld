@@ -1,0 +1,41 @@
+version: '3'
+services:
+  downloader:
+    build: .
+    restart: always
+    environment:
+    - "MYSQL_HOSTNAME=${MYSQL_HOSTNAME}"
+    - "MYSQL_USERNAME=${MYSQL_USERNAME}"
+    - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+    - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+    volumes:
+    - ssh_mediapanel_assets:/var/www/html/mediapanel/device_config
+    command: /app/mediaConverter.py download
+  convert_images:
+    build: .
+    restart: always
+    environment:
+    - "MYSQL_HOSTNAME=${MYSQL_HOSTNAME}"
+    - "MYSQL_USERNAME=${MYSQL_USERNAME}"
+    - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+    - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+    volumes:
+    - ssh_mediapanel_assets:/var/www/html/mediapanel/device_config
+    command: /app/mediaConverter.py convert
+  convert_videos:
+    build: .
+    restart: always
+    environment:
+    - "MYSQL_HOSTNAME=${MYSQL_HOSTNAME}"
+    - "MYSQL_USERNAME=${MYSQL_USERNAME}"
+    - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+    - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+    volumes:
+    - ssh_mediapanel_assets:/var/www/html/mediapanel/device_config
+    command: /app/mediaConverter.py convertMP4
+volumes:
+  ssh_mediapanel_assets:
+    driver: vieux/sshfs:latest
+    driver_opts:
+      sshcmd: "${SSHFS_USERNAME}@${SSHFS_HOSTNAME}:${SSHFS_RESOURCES_FOLDER}"
+      password: "${SSHFS_PASSWORD}"
