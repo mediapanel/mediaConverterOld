@@ -3,7 +3,7 @@ FROM debian:buster
 # Requirements
 RUN apt-get update && \
     apt-get install -y python2 python-pip default-libmysqlclient-dev \
-                       imagemagick ffmpeg mediainfo && \
+                       imagemagick ffmpeg mediainfo poppler-utils && \
     pip install requests pymediainfo mysqlclient youtube-dl
 
 # Install mediaConverter
