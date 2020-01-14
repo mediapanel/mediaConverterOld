@@ -267,7 +267,7 @@ def checkStorageLimitation(entry, pathToFile, multiplier):
             # Gets the storage use of the device with least reported free space
             deviceSize = getFolderSize(os.path.join(
                     "/var/www/html/mediapanel/device_config",
-                    entry["clientID"], "1", lowest_device))
+                    str(entry["clientID"]), "1", lowest_device))
 
             groupSize = getFolderSize(
                     entry["filePath"].replace("/uploaded/", ""))
